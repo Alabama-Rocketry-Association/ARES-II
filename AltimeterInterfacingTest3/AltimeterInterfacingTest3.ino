@@ -48,6 +48,7 @@ void loop() {
     Serial.write(value); //read byte from mySerial and output ascii value
     logFile.write(value);
     }
+  //////////FIX ME: Change to check and see if last 5 alt values are 0 or less than 0 to see if flight is over
   if( digitalRead(buttonPin) == HIGH) { //if button is pressed
     logFile.close(); //close file for writing
     Serial.println("Log stopped");
