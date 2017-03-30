@@ -1,3 +1,14 @@
+//This is a sketch that allows an Arduino Uno to communicate with Stratologger SL and Stratologger CF Altimeters for datalogging purposes.
+//These altimeters can be configured for "on pad" and "on launch" telemetry data to be sent over a header on their pcb's.
+//The Stratologgers operate on a 3.3v data level so a 3.3v to 5v level shift must be used in order for the altimeter
+//and Arduino to communicate. Also, the altimeter, Arduino, and level shift IC must have the same ground potential
+//for this sketch/circuit to work properly and not damage any components. 
+
+//Created by Alex Kersey
+//Last update: 3/29/17
+
+
+
 #include <SoftwareSerial.h>
 #include <SPI.h>
 #include <SD.h>
@@ -5,7 +16,7 @@
 SoftwareSerial mySerial(8, 7); // RX, TX 10 11
 File logFile;
 
-bool DEBUG_MODE = false; //change to true to see output while parsing log file after landing
+bool DEBUG_MODE = false; //change to true to see output while parsing log file after landing in serial monitor
 
 const int LAUNCH_DETECT = 200; //launch detection height in ft (AGL)
 const int LANDING_DETECT = 10; //landing detection height in ft (AGL). Greater than zero to account for varriations in terrain.
