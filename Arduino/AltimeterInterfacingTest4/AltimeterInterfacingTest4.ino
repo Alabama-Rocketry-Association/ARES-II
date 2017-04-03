@@ -5,7 +5,7 @@
 //for this sketch/circuit to work properly and not damage any components. 
 
 //Created by Alex Kersey
-//Last update: 3/29/17
+//Last update: 3/31/17
 
 
 
@@ -13,10 +13,10 @@
 #include <SPI.h>
 #include <SD.h>
 
-SoftwareSerial mySerial(8, 7); // RX, TX 10 11
+SoftwareSerial mySerial(8, 7); // RX, TX
 File logFile;
 
-bool DEBUG_MODE = false; //change to true to see output while parsing log file after landing in serial monitor
+bool DEBUG_MODE = true; //change to true to see output while parsing log file after landing in serial monitor
 
 const int LAUNCH_DETECT = 200; //launch detection height in ft (AGL)
 const int LANDING_DETECT = 10; //landing detection height in ft (AGL). Greater than zero to account for varriations in terrain.
@@ -27,7 +27,7 @@ byte byteArray[10];
 int index = 0;
 int val = 0;
 int maxAlt = 0;
-int lastAlt[5];
+int lastAlt[5] = {0};
 int j = 0;
 
 
@@ -59,22 +59,28 @@ void loop() {
   }
   if (mySerial.available()) {
     byte value = mySerial.read();
+    //Serial.print("Alt Reading: ");
     Serial.write(value); //read byte from mySerial and output ascii value
     logFile.write(value);
     byteArray[index] = value;
-    index++;
+    index++; 
     if(value == 10) {//convert and check if max alt
-      val = GetAltitude(index);
+      val = GetAltitude(index-1);
+      Serial.print("Converted Altitude: ");
+      Serial.println(val);
       lastAlt[j] = val;
+      if (val > maxAlt) { maxAlt = val; Serial.print("Updated max alt to: "); Serial.println(maxAlt);}
       j++;
       if( j > 4 ) { // if lastAlt array is full, start overwriting data from begining of array
         j = 0; 
       }
-    }      
+    }
+    index++;      
   }
+  //else {Serial.println("Error"); delay(1000);}
   
   if( maxAlt > LAUNCH_DETECT && lastAlt[0] < LANDING_DETECT && lastAlt[1] < LANDING_DETECT && lastAlt[2] < LANDING_DETECT && lastAlt[3] < LANDING_DETECT && lastAlt[4] < LANDING_DETECT) { //if rocket has landed
-
+    ClearArray();
     Serial.println("Rocket has landed.");
     logFile.close(); //close file for writing
     Serial.println("Log stopped");
@@ -86,7 +92,7 @@ void loop() {
     while(logFile.available()) { //reading in byte by byte from sd card
       inputByte = logFile.read();
       index = 0;
-      while(inputByte != 10) {//while not new line 
+      if(inputByte != 10) {//while not new line 
         byteArray[index] = inputByte;
         inputByte = logFile.read();
         index++; 
@@ -117,6 +123,7 @@ void ClearArray() {
   for(int i = 0; i < 10; i++) {
     byteArray[i] = 0;
   }
+  index = 0;
   return;
 }
 int OneDigit() {
@@ -172,7 +179,7 @@ int GetAltitude(int len) {
   else if (len == 5) { temp = FourDigit(); }
   else if (len == 6) { temp = FiveDigit(); }
   else if (len == 7) { temp = SixDigit(); }
-  else { temp = -100000; } // error case
+  else { temp = -10000; Serial.println(len);} // error case
   ClearArray();
   return temp;
 }
