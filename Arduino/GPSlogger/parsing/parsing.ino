@@ -1,5 +1,8 @@
 #include <Adafruit_GPS.h>
 #include <SoftwareSerial.h>
+#include <SD.h>
+
+File logfile;
 
 SoftwareSerial mySerial(8, 7);
 Adafruit_GPS GPS(&mySerial);
@@ -29,9 +32,31 @@ void setup()
   // delay(1000);
   // Ask for firmware version
   mySerial.println(PMTK_Q_RELEASE);
+
+  //Setting up logfile with incrementing name
+  char filename[15];
+  strcpy(filename, "GPSLOG00.TXT");
+  for (uint8_t i = 0; i < 100; i++) {
+    filename[6] = '0' + i/10;
+    filename[7] = '0' + i%10;
+    // create if does not exist, do not open existing, write, sync after write
+    if (! SD.exists(filename)) {
+      break;
+    }
+  }
+
+  logfile = SD.open(filename, FILE_WRITE);
+  if( ! logfile ) {
+    Serial.print("Couldnt create "); 
+    Serial.println(filename);
+    return;
+  }
+  Serial.print("Writing to "); 
+  Serial.println(filename);
 }
 
 uint32_t timer = millis();
+
 void loop()                     // run over and over again
 {
   char c = GPS.read();
@@ -66,7 +91,9 @@ void loop()                     // run over and over again
       Serial.print(GPS.latitude, 4); // Serial.print(GPS.lat);
       Serial.print(", "); 
       Serial.println(GPS.longitude, 4); // Serial.print(GPS.lon);
-      
+      logfile.print(GPS.latitude, 4);
+      logfile.print(", ");
+      logfile.println(GPS.longitude, 4);
       /*Serial.print(", ");
       Serial.print(GPS.hour, DEC); Serial.print(':');
       Serial.print(GPS.minute, DEC); Serial.print(':');
