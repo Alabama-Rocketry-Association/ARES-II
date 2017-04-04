@@ -16,7 +16,7 @@
 SoftwareSerial mySerial(8, 7); // RX, TX
 File logFile;
 
-bool DEBUG_MODE = true; //change to true to see output while parsing log file after landing in serial monitor
+bool DEBUG_MODE = false; //change to true to see output while parsing log file after landing in serial monitor
 
 const int LAUNCH_DETECT = 200; //launch detection height in ft (AGL)
 const int LANDING_DETECT = 10; //landing detection height in ft (AGL). Greater than zero to account for varriations in terrain.
@@ -75,7 +75,7 @@ void loop() {
         j = 0; 
       }
     }
-    index++;      
+    //index++;      
   }
   //else {Serial.println("Error"); delay(1000);}
   
